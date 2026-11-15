@@ -1,5 +1,7 @@
 # pi-action
 
+[![CI](https://github.com/dceoy/pi-action/actions/workflows/ci.yml/badge.svg)](https://github.com/dceoy/pi-action/actions/workflows/ci.yml)
+
 Run the [Pi](https://github.com/earendil-works/pi) coding agent from GitHub Actions in non-interactive print mode (`pi --print`).
 
 ## Quick start
@@ -43,11 +45,11 @@ jobs:
 
 Pi reads provider credentials from the environment (for example `ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, or `GEMINI_API_KEY`); run `pi --help` for the full list. Pi's response is written to the step log.
 
-## Automated PR reviews with OpenRouter
+## Automated PR reviews with Gemini
 
 The reusable [`pi-review.yml`](.github/workflows/pi-review.yml), modeled on [`opencode-review.yml`](https://github.com/dceoy/opencode-action/blob/main/.github/workflows/opencode-review.yml), runs **only** the pinned [`pr-review` Skill](https://github.com/dceoy/pr-loop/tree/main/skills/pr-review) when a trusted pull request is opened or marked ready for review. It does not run `pr-loop`, triage feedback, push changes, or merge PRs.
 
-Set `OPENROUTER_API_KEY` in **Settings → Secrets and variables → Actions**. The default model is `openrouter/openrouter/free`, which has variable model selection and rate limits; callers can override `model` with another `openrouter/<model-id>`. The workflow also accepts `prompt` (additional review focus), `thinking`, `timeout-minutes`, and `runs-on` for `workflow_call`. Call it from a `pull_request_target` workflow and supply the API key secret; pin the reusable workflow to a released commit SHA once available. A caller triggered by `pull_request` is skipped by the job guard.
+Set `GEMINI_API_KEY` in **Settings → Secrets and variables → Actions**. The default model is `google/gemini-4-hydrogen` (Gemini 4 Hydrogen, released 2026-11-12), with a 1,048,576-token context window, up to 65,536 output tokens, and tool-call support ([models.dev](https://models.dev)). Pricing is $1.50 per million input tokens and $7.50 per million output tokens. Callers can override `model`, for example with an `openrouter/<model-id>` model that requires `OPENROUTER_API_KEY`. For `workflow_call`, both API key secrets are optional at the interface level; the runtime check requires the key matching the selected Google or OpenRouter provider. The workflow also accepts `prompt` (additional review focus), `thinking`, `timeout-minutes`, and `runs-on` for `workflow_call`. Call it from a `pull_request_target` workflow and supply the API key secret; pin the reusable workflow to a released commit SHA once available. A caller triggered by `pull_request` is skipped by the job guard.
 
 The workflow executes only for non-draft, non-bot, same-repository PRs authored by an `OWNER`, `MEMBER`, or `COLLABORATOR`; fork PRs and comment triggers are excluded. The `pull_request_target` trigger loads workflow and self-action definitions from the base branch. It checks out the event's **base commit**, not untrusted PR code, and does not persist Git credentials. The workflow can review PRs with this new action mode only after the action and workflow are merged into the base branch.
 
@@ -70,5 +72,9 @@ The composite action's `review-only: 'true'` mode loads only `pr-review` at the 
 Each run installs the latest Pi using the [official installer](https://pi.dev/docs/latest/quickstart), so the Pi version is not pinned even when this action is pinned to a commit. The installer needs `curl` and Node.js 22.19.0 or newer with npm on the runner; the action does not set up Node.js.
 
 Normal runs install the four [pr-loop skills](https://github.com/dceoy/pr-loop) at the pinned commit; review-only runs install just `pr-review` into a temporary directory and make it available to Pi. The runner needs GitHub CLI with `gh skill` support and access to the repository.
+
+## Local tests
+
+Run the offline regression suite with `bats tests/` (requires [Bats](https://github.com/bats-core/bats-core)). No Pi installation, network, or API keys are needed.
 
 Pi runs its tools (including `bash`) without a permission prompt, so grant the job only the permissions the task needs and do not pass untrusted text as `prompt`.

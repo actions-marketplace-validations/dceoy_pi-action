@@ -11,6 +11,12 @@ on:
 permissions:
   contents: read
 jobs:
+  bats-test:
+    if: >
+      github.event_name == 'push'
+      || github.event_name == 'pull_request'
+      || github.event_name == 'workflow_dispatch'
+    uses: dceoy/gha-for-devops/.github/workflows/bats-test.yml@9e394d7c18b3a00fb853cd3c693cc4eeb5f0c825  # v2.3.0
   github-actions-lint-and-scan:
     if: >
       github.event_name == 'push'
@@ -47,6 +53,7 @@ jobs:
     if: >
       github.event_name == 'pull_request' && github.event.pull_request.user.login == 'dependabot[bot]'
     needs:
+      - bats-test
       - github-actions-lint-and-scan
       - markdown-lint
       - shell-lint
