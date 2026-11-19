@@ -41,6 +41,26 @@ jobs:
 Pi reads provider keys from the environment. See `pi --help` for supported providers.
 Output appears in the job log.
 
+### Sakura AI Engine
+
+Set `SAKURA_AI_ENGINE_API_KEY` in the action step's environment and use, for
+example, `model: sakura/gpt-oss-120b`. The action installs its bundled
+[model catalog](config/sakura-models.json) into Pi's `models.json`. The catalog
+is the full registry of Sakura chat models, with documented limits and
+capabilities; pricing is omitted. Model IDs can contain slashes, for example
+`sakura/preview/Kimi-K2.7-Code`. Only models with documented tool-call support
+are enabled for agent runs. Models discovered by the sync workflow join the
+catalog disabled for agent runs until curated into the allowlist in
+[`scripts/run-pi.sh`](scripts/run-pi.sh).
+
+```yaml
+env:
+  SAKURA_AI_ENGINE_API_KEY: ${{ secrets.SAKURA_AI_ENGINE_API_KEY }}
+with:
+  model: sakura/gpt-oss-120b
+  prompt: Review this repository
+```
+
 ## Automated PR reviews
 
 The reusable [`pi-review.yml`](.github/workflows/pi-review.yml) runs the pinned
@@ -50,9 +70,9 @@ It posts commit-bound `COMMENT` reviews without editing code or merging PRs.
 Add `.github/workflows/pi-review.yml` to your repository. Set the selected provider's
 Actions secret. Replace `FULL_COMMIT_SHA` with a reviewed `dceoy/pi-action` commit SHA.
 
-### OpenRouter
+Uses `sakura/preview/DeepSeek-V4.1-Flash-1017` by default.
 
-Uses `openrouter/thinkingmachines/inkling-2-small:free` by default.
+### OpenRouter
 
 ```yaml
 name: Pi review (OpenRouter)
@@ -67,6 +87,8 @@ permissions:
 jobs:
   review:
     uses: dceoy/pi-action/.github/workflows/pi-review.yml@FULL_COMMIT_SHA
+    with:
+      model: openrouter/openai/gpt-oss-120b
     secrets:
       OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
 ```
@@ -94,6 +116,27 @@ jobs:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 ```
 
+### Sakura AI Engine reviews
+
+```yaml
+name: Pi review (Sakura AI Engine)
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+  actions: read
+jobs:
+  review:
+    uses: dceoy/pi-action/.github/workflows/pi-review.yml@FULL_COMMIT_SHA
+    with:
+      model: sakura/preview/Kimi-K2.7-Code
+    secrets:
+      SAKURA_AI_ENGINE_API_KEY: ${{ secrets.SAKURA_AI_ENGINE_API_KEY }}
+```
+
 ### Review settings
 
 Optional `with` inputs: `model`, `prompt` (review focus), `thinking`,
@@ -113,8 +156,6 @@ to `read,bash`. It verifies the PR URL and head SHA before posting one review.
 **Security:** These restrictions are not an OS sandbox or API allowlist.
 Pi can execute shell commands, and `pull-requests: write` permits more than reviews.
 Use only trusted workflows. Do not pass untrusted text as a prompt.
-
-OpenRouter's default free Inkling endpoint logs prompts and outputs for model improvement.
 Do not send confidential code or personal data.
 
 ## Inputs

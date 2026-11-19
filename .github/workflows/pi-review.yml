@@ -7,7 +7,7 @@ on:
         required: false
         type: string
         description: Model to use with Pi, in provider/model format
-        default: openrouter/thinkingmachines/inkling-2-small:free
+        default: sakura/preview/DeepSeek-V4.1-Flash-1017
       prompt:
         required: false
         type: string
@@ -35,6 +35,9 @@ on:
       OPENROUTER_API_KEY:
         required: false
         description: OpenRouter API key for openrouter model overrides
+      SAKURA_AI_ENGINE_API_KEY:
+        required: false
+        description: Sakura AI Engine API key
   pull_request:
     types:
       - opened
@@ -68,9 +71,10 @@ jobs:
       - name: Check model provider secret
         shell: bash
         env:
-          MODEL: ${{ inputs.model || 'openrouter/thinkingmachines/inkling-2-small:free' }}
+          MODEL: ${{ inputs.model || 'sakura/preview/DeepSeek-V4.1-Flash-1017' }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          SAKURA_AI_ENGINE_API_KEY: ${{ secrets.SAKURA_AI_ENGINE_API_KEY }}
         run: |
           case "${MODEL}" in
             google/*)
@@ -85,18 +89,25 @@ jobs:
                 exit 1
               fi
               ;;
+            sakura/*)
+              if [[ -z "${SAKURA_AI_ENGINE_API_KEY}" ]]; then
+                echo "::error::Configure the SAKURA_AI_ENGINE_API_KEY Actions secret." >&2
+                exit 1
+              fi
+              ;;
           esac
       - name: Review pull request using Pi
         uses: $/.  # nosemgrep: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          SAKURA_AI_ENGINE_API_KEY: ${{ startsWith(inputs.model || 'sakura/preview/DeepSeek-V4.1-Flash-1017', 'sakura/') && secrets.SAKURA_AI_ENGINE_API_KEY || '' }}
           GH_TOKEN: ${{ github.token }}
           GITHUB_TOKEN: ${{ github.token }}
           PR_REVIEW_URL: ${{ github.event.pull_request.html_url }}
           PR_REVIEW_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         with:
-          model: ${{ inputs.model || 'openrouter/thinkingmachines/inkling-2-small:free' }}
+          model: ${{ inputs.model || 'sakura/preview/DeepSeek-V4.1-Flash-1017' }}
           thinking: ${{ inputs.thinking }}
           review-only: 'true'
           timeout-minutes: ${{ inputs.timeout-minutes || 60 }}
