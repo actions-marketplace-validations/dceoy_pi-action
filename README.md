@@ -41,6 +41,26 @@ jobs:
 Pi reads provider keys from the environment. See `pi --help` for supported providers.
 Output appears in the job log.
 
+### Sakura AI Engine
+
+Set `SAKURA_AI_ENGINE_API_KEY` in the action step's environment and use, for
+example, `model: sakura/gpt-oss-120b`. The action installs its bundled
+[model catalog](config/sakura-models.json) into Pi's `models.json`. The catalog
+is the full registry of Sakura chat models, with documented limits and
+capabilities; pricing is omitted. Model IDs can contain slashes, for example
+`sakura/preview/Kimi-K2.7-Code`. Only models with documented tool-call support
+are enabled for agent runs. Models discovered by the sync workflow join the
+catalog disabled for agent runs until curated into the allowlist in
+[`scripts/run-pi.sh`](scripts/run-pi.sh).
+
+```yaml
+env:
+  SAKURA_AI_ENGINE_API_KEY: ${{ secrets.SAKURA_AI_ENGINE_API_KEY }}
+with:
+  model: sakura/gpt-oss-120b
+  prompt: Review this repository
+```
+
 ## Automated PR reviews
 
 The reusable [`pi-review.yml`](.github/workflows/pi-review.yml) runs the pinned
@@ -92,6 +112,27 @@ jobs:
       model: google/gemini-4-hydrogen
     secrets:
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+```
+
+### Sakura AI Engine reviews
+
+```yaml
+name: Pi review (Sakura AI Engine)
+on:
+  pull_request:
+    types: [opened, ready_for_review]
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+  actions: read
+jobs:
+  review:
+    uses: dceoy/pi-action/.github/workflows/pi-review.yml@FULL_COMMIT_SHA
+    with:
+      model: sakura/preview/Kimi-K2.7-Code
+    secrets:
+      SAKURA_AI_ENGINE_API_KEY: ${{ secrets.SAKURA_AI_ENGINE_API_KEY }}
 ```
 
 ### Review settings
