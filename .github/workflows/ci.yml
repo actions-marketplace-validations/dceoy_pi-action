@@ -17,7 +17,7 @@ jobs:
       github.event_name == 'push'
       || github.event_name == 'pull_request'
       || github.event_name == 'workflow_dispatch'
-    uses: dceoy/gha-for-devops/.github/workflows/bats-test.yml@9e394d7c18b3a00fb853cd3c693cc4eeb5f0c825  # v2.3.0
+    uses: dceoy/gha-for-devops/.github/workflows/bats-test.yml@2a8aaab7fcc91494813c33293345e000244a0d90  # v2.3.1
   github-actions-lint-and-scan:
     if: >
       github.event_name == 'push'
@@ -27,7 +27,7 @@ jobs:
       contents: read
       actions: read
       security-events: write
-    uses: dceoy/gha-for-devops/.github/workflows/github-actions-lint-and-scan.yml@9e394d7c18b3a00fb853cd3c693cc4eeb5f0c825  # v2.3.0
+    uses: dceoy/gha-for-devops/.github/workflows/github-actions-lint-and-scan.yml@2a8aaab7fcc91494813c33293345e000244a0d90  # v2.3.1
     with:
       search-path: .github/workflows
       yamllint-search-path: .
@@ -39,7 +39,7 @@ jobs:
       github.event_name == 'push'
       || github.event_name == 'pull_request'
       || github.event_name == 'workflow_dispatch'
-    uses: dceoy/gha-for-devops/.github/workflows/markdown-lint.yml@9e394d7c18b3a00fb853cd3c693cc4eeb5f0c825  # v2.3.0
+    uses: dceoy/gha-for-devops/.github/workflows/markdown-lint.yml@2a8aaab7fcc91494813c33293345e000244a0d90  # v2.3.1
     with:
       search-path: .
   shell-lint:
@@ -49,7 +49,7 @@ jobs:
       || github.event_name == 'workflow_dispatch'
     permissions:
       contents: read
-    uses: dceoy/gha-for-devops/.github/workflows/shell-lint.yml@9e394d7c18b3a00fb853cd3c693cc4eeb5f0c825  # v2.3.0
+    uses: dceoy/gha-for-devops/.github/workflows/shell-lint.yml@2a8aaab7fcc91494813c33293345e000244a0d90  # v2.3.1
     with:
       search-path: .
   dependabot-auto-merge:
@@ -66,6 +66,6 @@ jobs:
       actions: read
       checks: read
       statuses: read
-    uses: dceoy/gha-for-devops/.github/workflows/dependabot-auto-merge.yml@9e394d7c18b3a00fb853cd3c693cc4eeb5f0c825  # v2.3.0
+    uses: dceoy/gha-for-devops/.github/workflows/dependabot-auto-merge.yml@2a8aaab7fcc91494813c33293345e000244a0d90  # v2.3.1
     with:
       unconditional: true
